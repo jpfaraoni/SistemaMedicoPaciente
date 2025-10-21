@@ -19,7 +19,7 @@ class AbstractTela(ABC):
 
     def seleciona_entidade_por_id(self, titulo: str, texto_prompt: str, chave_input: str):
         layout = [
-            [sg.Text(texto_promp), sg.InputText(key="id")],
+            [sg.Text(texto_prompt), sg.InputText(key="id")],
             [sg.Button("Confirmar"), sg.Button("Cancelar")],
         ]
         window = sg.Window(titulo, layout)
