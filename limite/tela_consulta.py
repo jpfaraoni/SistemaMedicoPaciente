@@ -8,18 +8,18 @@ class TelaConsulta(AbstractTela):
         super().__init__(tela_sistema)
 
     def tela_opcoes(self):
-        sg.change_look_and_feel('LightGrey1')
+        sg.change_look_and_feel('Material1')
 
         layout_esquerda = [
-            [sg.Image(filename='limite/imagens/imagemmedicopaciente.png')]
+            [sg.Image(filename='limite/imagens/imagem_sistema_pequena..png')]
         ]
 
         layout_direita = [
-            [sg.Button("Agendar Consulta", key=1, size=(9, 1), font=("Helvetica", 12))],
-            [sg.Button("Atualizar Dados Consulta", key=2, size=(9, 1), font=("Helvetica", 12))],
-            [sg.Button("Cancelar Consulta", key=3, size=(9, 1), font=("Helvetica", 12))],
-            [sg.Button("Listar Consultas", key=4, size=(9, 1), font=("Helvetica", 12))],
-            [sg.Button("Sair", key=0, size=(9, 1), font=("Helvetica", 12))],
+            [sg.Button("Agendar Consulta", key=1, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Atualizar Dados Consulta", key=2, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Cancelar Consulta", key=3, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Listar    Consultas", key=4, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Sair", key=0, size=(11, 1.15), font=("Helvetica", 13))],
         ]
 
         layout = [

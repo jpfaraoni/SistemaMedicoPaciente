@@ -11,15 +11,15 @@ class TelaSistema:
         Retorna:
             int: Código da opção selecionada pelo usuário.
         """
-        sg.ChangeLookAndFeel('LightGrey1')
+        sg.ChangeLookAndFeel('Material1')
         layout_esquerda = [
-            [sg.Image(filename='limite/imagens/imagem_sistema(novo).png')]
+            [sg.Image(filename='limite/imagens/imagem_sistema_pequena..png')]
         ]
         layout_direita = [
-            [sg.Button("Gerenciar Pacientes", key=1, size=(15, 1), font=("Helvetica", 12))],
-            [sg.Button("Gerenciar Médicos", key=2, size=(15, 1), font=("Helvetica", 12))],
-            [sg.Button("Gerenciar Consultas", key=3, size=(15, 1), font=("Helvetica", 12))],
-            [sg.Button("Finalizar Sistema", key=0, size=(15, 1), font=("Helvetica", 12))],
+            [sg.Button("Gerenciar Pacientes", key=1, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Gerenciar Médicos", key=2, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Gerenciar Consultas", key=3, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Finalizar  Sistema", key=0, size=(11, 1.15), font=("Helvetica", 13))],
         ]
 
         layout = [
