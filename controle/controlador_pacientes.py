@@ -35,7 +35,7 @@ class ControladorPacientes(ControladorEntidadeAbstrata):
                 raise ValueError("Cpf inválido.")
 
             try:
-                self.busca_paciente(cpf)  # Tenta buscar o filme pelo título
+                self.busca_paciente(cpf)  
                 raise ValueError(f"Paciente com cpf '{cpf}' já está cadastrado.")
             except PacienteNaoEncontrado:
                 novo_paciente = Paciente(
@@ -59,11 +59,13 @@ class ControladorPacientes(ControladorEntidadeAbstrata):
         try:
             cpf = self.listar_pacientes(selecionar=True)
 
-            if cpf is not None:
-                paciente = self.__paciente_DAO.get(cpf)
-            else:
-                raise ValueError("Erro", "Nenhum paciente selecionado.")
+            # Verifica se o usuário cancelou a seleção do paciente
+            if cpf is None:
+                return  # Retorna silenciosamente se o usuário cancelou
 
+            paciente = self.busca_paciente(cpf)
+            
+            # Agora tenta pegar os novos dados - se cancelar aqui, a exceção será capturada
             novos_dados = self.__telapacientes.pega_novos_dados_paciente()
 
             nome = novos_dados["nome"]
@@ -95,18 +97,22 @@ class ControladorPacientes(ControladorEntidadeAbstrata):
         except ValueError as ve:
             self.__telapacientes.mostra_mensagem("Erro:", f"{ve}")
         except CancelOpException:
-            pass
+            pass  # Usuário cancelou - não faz nada
 
     def busca_paciente(self, cpf):
-        pacientes = self.__paciente_DAO.get_all()
-        for paciente in pacientes:
-            if paciente.cpf == cpf:
-                return paciente
-        raise PacienteNaoEncontrado(cpf)
+        paciente = self.__paciente_DAO.get(cpf)
+        if paciente is not None:
+            return paciente
+        else:
+            raise PacienteNaoEncontrado(cpf)
 
     def remover_paciente(self):
         try:
             cpf = self.listar_pacientes(selecionar=True)
+
+            # Verifica se o usuário cancelou a seleção do paciente
+            if cpf is None:
+                return  # Retorna silenciosamente se o usuário cancelou
 
             self.__paciente_DAO.remove(cpf)
             self.__telapacientes.mostra_mensagem("Confirmação", f"Paciente com cpf '{cpf}' foi removido com sucesso.")
@@ -114,7 +120,7 @@ class ControladorPacientes(ControladorEntidadeAbstrata):
         except PacienteNaoEncontrado as e:
             self.__telapacientes.mostra_mensagem(f"Erro:", f"{e}")
         except CancelOpException:
-            pass
+            pass  # Usuário cancelou - não faz nada
 
     def listar_pacientes(self, selecionar=False):
 
@@ -129,7 +135,7 @@ class ControladorPacientes(ControladorEntidadeAbstrata):
         try:
             return self.__telapacientes.exibe_lista_pacientes(pacientes_info, selecionar)
         except CancelOpException:
-            pass
+            return None  # Retorna None explicitamente quando o usuário cancela
 
 
     def abre_tela(self):

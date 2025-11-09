@@ -25,9 +25,7 @@ class PacienteDAO(DAO):
     def get(self, cpf: int):
         if isinstance(cpf, int) and (cpf is not None):
             return super().get(cpf)
-        else:
-            self.__telapacientes.mostra_mensagem("Erro", "Erro ao buscar paciente.")
-            return None
+        return None
 
     def remove(self, cpf: int):
         if isinstance(cpf, int) and (cpf is not None):

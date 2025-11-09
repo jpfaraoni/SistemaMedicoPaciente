@@ -33,7 +33,7 @@ class ControladorSistema:
         self.__controlador_consulta.abre_tela()
 
     def cadastra_medicos(self):
-        self.__controlador_medicos.menu_medicos()
+        self.__controlador_medicos.abre_tela()
 
     def encerra_sistema(self):
         exit(0)

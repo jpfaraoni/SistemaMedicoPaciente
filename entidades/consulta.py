@@ -63,9 +63,9 @@ class Consulta:
 
     @property
     def sala(self):
-        return self.__sala
+        return self.__medico.sala
 
-    @sala.setter
-    def sala(self, sala: str):
-        if isinstance(sala, str):
-            self.__sala = sala
+    # @sala.setter
+    # def sala(self, sala: str):
+    #     if isinstance(sala, str):
+    #         self.__sala = sala

@@ -124,7 +124,7 @@ class TelaConsulta(AbstractTela):
         button, values = window.read()
         window.close()
 
-        if button in (None, "Cancelar"):
+        if button in (None, "Cancelar", "Fechar"):
             raise CancelOpException()
 
         for key, selected in values.items():

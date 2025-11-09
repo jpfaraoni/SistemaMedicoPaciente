@@ -8,18 +8,18 @@ class TelaPacientes(AbstractTela):
         super().__init__(tela_sistema)
 
     def tela_opcoes(self):
-        sg.change_look_and_feel('LightGrey1')
+        sg.change_look_and_feel('Material1')
 
         layout_esquerda = [
-            [sg.Image(filename='limite/imagens/imagemmedicopaciente.png')]
+            [sg.Image(filename='limite/imagens/imagem_sistema_pequena..png')]
         ]
 
         layout_direita = [
-            [sg.Button("Adicionar Paciente", key=1, size=(9, 1), font=("Helvetica", 12))],
-            [sg.Button("Atualizar Dados Paciente", key=2, size=(9, 1), font=("Helvetica", 12))],
-            [sg.Button("Remover Paciente", key=3, size=(9, 1), font=("Helvetica", 12))],
-            [sg.Button("Listar Pacientes", key=4, size=(9, 1), font=("Helvetica", 12))],
-            [sg.Button("Sair", key=0, size=(9, 1), font=("Helvetica", 12))],
+            [sg.Button("Adicionar Paciente", key=1, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Atualizar Dados Paciente", key=2, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Remover Paciente", key=3, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Listar    Pacientes", key=4, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Sair", key=0, size=(11, 1.15), font=("Helvetica", 13))],
         ]
 
         layout = [
@@ -129,9 +129,13 @@ class TelaPacientes(AbstractTela):
         button, values = window.read()
         window.close()
 
-        if button in (None, "Cancelar"):
+        if button in (None, "Cancelar", "Fechar"):
             raise CancelOpException()
 
         for key, selected in values.items():
             if selected:
                 return int(key)
+        
+        # Se nenhum paciente foi selecionado e o usuário confirmou, levanta exceção
+        if selecionar:
+            raise CancelOpException()

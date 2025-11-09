@@ -18,6 +18,7 @@ class ControladorConsultas(ControladorEntidadeAbstrata):
         super().__init__(controlador_sistema)
         self.__telaconsulta = TelaConsulta(controlador_sistema)
         self.__consulta_DAO = ConsultaDAO()
+        #TODO instanciar os dao's de medicos e pacientes para a consulta de banco de dados 
        
 
         """
@@ -101,8 +102,12 @@ class ControladorConsultas(ControladorEntidadeAbstrata):
         try:
             # Listar pacientes e medicos para auxiliar o usuário na escolha
             cpf_paciente = self._controlador_sistema.controlador_pacientes.listar_pacientes(selecionar=True)
+            if cpf_paciente is None:
+                pass
             crm_medico = self._controlador_sistema.controlador_medicos.listar_medicos(selecionar=True)
-            
+            if crm_medico is None:
+                pass
+
             paciente = self._controlador_sistema.controlador_pacientes.busca_paciente(cpf_paciente)
             medico = self._controlador_sistema.controlador_medicos.busca_medico(crm_medico)
             # Obter dados da consulta a partir da visão
@@ -133,20 +138,19 @@ class ControladorConsultas(ControladorEntidadeAbstrata):
             self.__telaconsulta.mostra_mensagem("Erro", f"Erro: {ve}")
         except CancelOpException:
             pass
-        # except Exception as ex:
-        #     self.__telaconsulta.mostra_mensagem("Erro", f"Erro inesperado: {ex}")
+        except Exception as ex:
+            self.__telaconsulta.mostra_mensagem("Erro", f"Erro inesperado: {ex}")
 
     def atualizar_consulta(self):
         try:
             nmr_consulta = self.listar_consultas(selecionar=True)
             if nmr_consulta is not None:
-                consulta = self.__consulta_DAO.get(nmr_consulta)
-            else:
-                raise ValueError("Erro", "Nenhuma consulta selecionada.")
+                consulta = self.busca_consulta(nmr_consulta)
 
             cpf_paciente = self._controlador_sistema.controlador_pacientes.listar_pacientes(selecionar=True)
             crm_medico = self._controlador_sistema.controlador_medicos.listar_medicos(selecionar=True)
-
+            
+            #TODO usar metodo get de abstrato.dao para retornar o objeto do banco de dados respectivo
             paciente = self._controlador_sistema.controlador_pacientes.busca_paciente(cpf_paciente)
             medico = self._controlador_sistema.controlador_medicos.busca_medico(crm_medico)
 
@@ -168,13 +172,17 @@ class ControladorConsultas(ControladorEntidadeAbstrata):
             self.__consulta_DAO.update(consulta)
             self.listar_consultas()
             self.__telaconsulta.mostra_mensagem("Confirmação", f"Consulta número {consulta.numero} atualizada com sucesso!")
+        
+        except HorarioInvalido as e:
+            self.__telaconsulta.mostra_mensagem("Erro", f"Erro: {e}")
+        except ConsultaNaoEncontrada as e:
+            self.__telaconsulta.mostra_mensagem("Erro", f"Erro: {e}")
         except ValueError as ve:
             self.__telaconsulta.mostra_mensagem("Erro", f"Erro de valor: {ve}")
         except CancelOpException:
             pass
 
     def remover_consulta(self):
-        #    def remover_sessao(self, filme, sala, horario):
         try:
             nmr_consulta = self.listar_consultas(selecionar=True)
 
@@ -186,11 +194,11 @@ class ControladorConsultas(ControladorEntidadeAbstrata):
             self.__telaconsulta.mostra_mensagem("Erro", f"{ve}")
 
     def busca_consulta(self, nmr_consulta: int):
-        consultas = self.__consulta_DAO.get_all()
-        for consulta in consultas:
-            if consulta.numero == nmr_consulta:
-                return consulta
-        raise ConsultaNaoEncontrada(nmr_consulta)
+        consulta = self.__consulta_DAO.get(nmr_consulta)
+        if consulta is not None:
+            return consulta
+        else:
+            raise ConsultaNaoEncontrada(nmr_consulta)
 
     def listar_consultas(self, selecionar = False):
         consultas = self.__consulta_DAO.get_all()
@@ -199,8 +207,8 @@ class ControladorConsultas(ControladorEntidadeAbstrata):
             return None 
 
         consulta_info = [{"numero": consulta.numero,
-                                            "paciente": consulta.paciente,
-                                            "medico": consulta.medico,
+                                            "paciente": consulta.paciente.nome,
+                                            "medico": consulta.medico.nome,
                                             "data": consulta.data,
                                             "horario": consulta.horario,}
                                             for consulta in consultas]
@@ -208,7 +216,7 @@ class ControladorConsultas(ControladorEntidadeAbstrata):
         try:
             return self.__telaconsulta.exibe_lista_consulta(consulta_info, selecionar)
         except CancelOpException:
-            pass
+            return None
 
     def abre_tela(self):
         lista_opcoes = {1: self.adicionar_consultas, 2: self.atualizar_consulta, 3: self.remover_consulta,
