@@ -17,8 +17,8 @@ class TelaMedicos(AbstractTela):
         layout_direita = [
             [sg.Button("Adicionar Médico", key=1, size=(11, 1.15), font=("Helvetica", 13))],
             [sg.Button("Atualizar Dados Médico", key=2, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Remover Médico", key=3, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Listar    Médicos", key=4, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Remover      Médico", key=3, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Listar      Médicos", key=4, size=(11, 1.15), font=("Helvetica", 13))],
             [sg.Button("Sair", key=0, size=(11, 1.15), font=("Helvetica", 13))],
         ]
 
@@ -150,14 +150,13 @@ class TelaMedicos(AbstractTela):
             if selecionar:
                 layout.append([
                     sg.Radio(
-                        f"Nome: {medico['nome']}, Especialidade: {medico['especialidade']}, Expediente: {medico['expediente_inicial']}-{medico['expediente_final']}, Sala: {medico['sala']}",
-                        f"Crm: {medico['crm']}",
+                        f"CRM: {medico['crm']}, Nome: {medico['nome']}, Especialidade: {medico['especialidade']}, Expediente: {medico['expediente_inicial']}-{medico['expediente_final']}, Sala: {medico['sala']}",
                         "MÉDICOS",
                         key=int(medico['crm'])
                     )
                 ])
             else:
-                layout.append([sg.Text(f"Nome: {medico['nome']}, Especialidade: {medico['especialidade']}, Expediente: {medico['expediente_inicial']}-{medico['expediente_final']}, Sala: {medico['sala']}")])
+                layout.append([sg.Text(f"CRM: {medico['crm']}, Nome: {medico['nome']}, Especialidade: {medico['especialidade']}, Expediente: {medico['expediente_inicial']}-{medico['expediente_final']}, Sala: {medico['sala']}")])
     
         if selecionar:
             layout.append([sg.Button("Confirmar"), sg.Cancel("Cancelar")])

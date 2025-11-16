@@ -56,47 +56,6 @@ class TelaConsulta(AbstractTela):
         except ValueError:
             raise ValueError("Dados inválidos.")
 
-
-    # def pega_novos_dados_paciente(self):
-    #     layout = [
-    #         [sg.Text("Novo nome do paciente:"), sg.InputText(key="nome")],
-    #         [sg.Text("Novo email do paciente:"), sg.InputText(key="email")],
-    #         [sg.Text("Nova idade do paciente:"), sg.InputText(key="idade")],
-    #         [sg.Button("Confirmar"), sg.Button("Cancelar")],
-    #     ]
-    #     window = sg.Window("Atualizar Paciente", layout)
-
-    #     button, values = window.read()
-    #     window.close()
-
-    #     if button in ("Cancelar", None):
-    #         raise CancelOpException()
-
-    #     try:
-    #         return {
-    #             "nome": values["nome"],
-    #             "email": values["email"],
-    #             "idade": int(values["idade"]),
-    #         }
-    #     except ValueError:
-    #         raise ValueError("Dados inválidos.")
-
-    # def seleciona_consulta(self):
-    #     layout = [
-    #         [sg.Text("Digite o cpf do paciente que deseja selecionar:"), sg.InputText(key="cpf")],
-    #         [sg.Button("Confirmar"), sg.Button("Cancelar")],
-    #     ]
-    #     window = sg.Window("Selecionar Paciente", layout)
-
-    #     button, values = window.read()
-    #     window.close()
-
-    #     if button in ("Cancelar", None):
-    #         raise CancelOpException()
-
-    #     return values["cpf"]
-
-
     def exibe_lista_consulta(self, consultas, selecionar=False):
         if not consultas:
             self.__mostra_mensagem("Erro", "Nenhuma consulta cadastrada.")
