@@ -7,7 +7,11 @@ class Paciente(Pessoa):
         
         super().__init__(nome, email, cpf, contato, data_nascimento, genero)
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   
+=======
+
+>>>>>>> Stashed changes
 =======
 
 >>>>>>> Stashed changes
@@ -44,7 +48,11 @@ class Paciente(Pessoa):
     def tipo_sanguineo(self, tipo_sanguineo: str):
         if isinstance(tipo_sanguineo, str):
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             self.__tipo_sanguineo = tipo_sanguineo
+=======
+            self.__tipo_sanguineo = tipo_sanguineo
+>>>>>>> Stashed changes
 =======
             self.__tipo_sanguineo = tipo_sanguineo
 >>>>>>> Stashed changes
