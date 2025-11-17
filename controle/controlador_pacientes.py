@@ -6,6 +6,13 @@ from exceptions.cancel_op_exception import CancelOpException
 from DAO.paciente_dao import PacienteDAO
 
 class ControladorPacientes(ControladorEntidadeAbstrata):
+    _instance = None 
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+    
     def __init__(self, controlador_sistema):
         super().__init__(controlador_sistema)
         self.__telapacientes = TelaPacientes(controlador_sistema)

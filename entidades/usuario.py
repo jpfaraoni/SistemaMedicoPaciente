@@ -1,0 +1,24 @@
+class Usuario:
+    def __init__(self, login: str, senha_hash: str, tipo_usuario: str, id_entidade: int):
+        # tipo_usuario pode ser 'secretaria', 'paciente', 'medico'
+        # id_entidade é o CPF ou CRM para vincular ao objeto Paciente/Medico
+        self.__login = login
+        self.__senha_hash = senha_hash
+        self.__tipo_usuario = tipo_usuario
+        self.__id_entidade = id_entidade
+    
+    @property
+    def login(self):
+        return self.__login
+
+    @property
+    def senha_hash(self):
+        return self.__senha_hash
+
+    @property
+    def tipo_usuario(self):
+        return self.__tipo_usuario
+
+    @property
+    def id_entidade(self):
+        return self.__id_entidade

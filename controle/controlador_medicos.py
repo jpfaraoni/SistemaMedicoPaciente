@@ -8,6 +8,13 @@ from limite.tela_medicos import TelaMedicos
 import PySimpleGUI as sg
 
 class ControladorMedicos(ControladorEntidadeAbstrata):
+    _instance = None 
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+    
     def __init__(self, controlador_sistema):
         super().__init__(controlador_sistema)
         self.__telamedico = TelaMedicos(controlador_sistema)
