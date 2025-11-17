@@ -1,11 +1,16 @@
+from entidades.pessoa import Pessoa
 from entidades.sala import Sala
 
-class Medico:
-    def __init__(self, crm: int, nome: str, especialidade: str, expediente_inicial: str, expediente_final: str, sala: Sala):
+class Medico(Pessoa):
+    
+    def __init__(self, 
+                 nome: str, email: str, cpf: int, contato: str, data_nascimento: str, genero: str, 
+                 crm: int, especialidade: str, expediente_inicial: str, expediente_final: str, sala: Sala):
+        
+        super().__init__(nome, email, cpf, contato, data_nascimento, genero)
+
         if isinstance(crm, int):
             self.__crm = crm
-        if isinstance(nome, str):
-            self.__nome = nome
         if isinstance(especialidade, str):
             self.__especialidade = especialidade
         if isinstance(expediente_inicial, str):
@@ -23,15 +28,6 @@ class Medico:
     def crm(self, crm: int):
         if isinstance(crm, int):
             self.__crm = crm
-
-    @property
-    def nome(self):
-        return self.__nome
-
-    @nome.setter
-    def nome(self, nome: str):
-        if isinstance(nome, str):
-            self.__nome = nome
 
     @property
     def especialidade(self):

@@ -1,3 +1,4 @@
+# Arquivo: limite/tela_medicos.py
 import PySimpleGUI as sg
 from exceptions.cancel_op_exception import CancelOpException
 from limite.abstract_tela import AbstractTela
@@ -17,8 +18,8 @@ class TelaMedicos(AbstractTela):
         layout_direita = [
             [sg.Button("Adicionar Médico", key=1, size=(11, 1.15), font=("Helvetica", 13))],
             [sg.Button("Atualizar Dados Médico", key=2, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Remover      Médico", key=3, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Listar      Médicos", key=4, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Remover Médico", key=3, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Listar    Médicos", key=4, size=(11, 1.15), font=("Helvetica", 13))],
             [sg.Button("Sair", key=0, size=(11, 1.15), font=("Helvetica", 13))],
         ]
 
@@ -34,10 +35,46 @@ class TelaMedicos(AbstractTela):
         window.close()
         return event if event is not None else 0
 
+    # --- NOVO MÉTODO PARA O MENU DO MÉDICO ---
+    def tela_opcoes_medico(self):
+        """
+        Mostra um menu de opções restrito para o médico logado.
+        """
+        sg.change_look_and_feel('Material1')
+        
+        layout_esquerda = [
+            [sg.Image(filename='limite/imagens/imagem_sistema_pequena..png')]
+        ]
+        
+        # Menu restrito
+        layout_direita = [
+            [sg.Button("Ver Meus Dados", key=1, size=(15, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Atualizar Meus Dados", key=2, size=(15, 1.15), font=("Helvetica", 13))],
+            # Adicione aqui o botão 5 para "Sugerir Terapia" se quiser
+            [sg.Button("Sair", key=0, size=(15, 1.15), font=("Helvetica", 13))],
+        ]
+
+        layout = [
+            [sg.Column(layout_direita),
+             sg.VSeparator(),
+             sg.Column(layout_esquerda)]
+        ]
+        
+        window = sg.Window("Meu Perfil Médico", layout, size=(600, 400), finalize=True)
+        event, _ = window.read()
+        window.close()
+        return event if event is not None else 0
+
     def pega_dados_medicos(self):
         layout = [
-            [sg.Text("CRM:"), sg.InputText(key="crm")],
             [sg.Text("Nome:"), sg.InputText(key="nome")],
+            [sg.Text("Email:"), sg.InputText(key="email")],
+            [sg.Text("CPF:"), sg.InputText(key="cpf")],
+            [sg.Text("Contato (telefone):"), sg.InputText(key="contato")],
+            [sg.Text("Data de Nascimento(DD/MM/AAAA):"), sg.InputText(key="data_nascimento")],
+            [sg.Text("Gênero:"), sg.InputText(key="genero")],
+            [sg.HorizontalSeparator()],
+            [sg.Text("CRM:"), sg.InputText(key="crm")],
             [sg.Text("Especialidade:"), sg.InputText(key="especialidade")],
             [sg.Text("Expediente Inicial (HH:MM):"), sg.InputText(key="expediente_inicial")],
             [sg.Text("Expediente Final (HH:MM):"), sg.InputText(key="expediente_final")],
@@ -53,14 +90,19 @@ class TelaMedicos(AbstractTela):
 
         try:
             return {
-                "crm": int(values["crm"]),
                 "nome": values["nome"],
+                "email": values["email"],
+                "cpf": int(values["cpf"]),
+                "contato": values["contato"],
+                "data_nascimento": values["data_nascimento"],
+                "genero": values["genero"],
+                "crm": int(values["crm"]),
                 "especialidade": values["especialidade"],
                 "expediente_inicial": values["expediente_inicial"],
                 "expediente_final": values["expediente_final"],
             }
         except ValueError:
-            raise ValueError("Dados inválidos.")
+            raise ValueError("Dados inválidos (CPF e CRM devem ser números).")
 
     def seleciona_sala(self, salas):
         """
@@ -94,14 +136,18 @@ class TelaMedicos(AbstractTela):
             if selected:
                 return int(key)
         
-        # Se nenhuma sala foi selecionada e o usuário confirmou, levanta exceção
         raise CancelOpException()
 
 
     def pega_novos_dados_medicos(self):
         layout = [
             [sg.Text("Novo nome do médico:"), sg.InputText(key="nome")],
-            [sg.Text("Novo especialidade do médico:"), sg.InputText(key="especialidade")],
+            [sg.Text("Novo email do médico:"), sg.InputText(key="email")],
+            [sg.Text("Novo contato (telefone):"), sg.InputText(key="contato")],
+            [sg.Text("Nova data de nascimento (DD/MM/AAAA):"), sg.InputText(key="data_nascimento")],
+            [sg.Text("Novo gênero:"), sg.InputText(key="genero")],
+            [sg.HorizontalSeparator()],
+            [sg.Text("Nova especialidade do médico:"), sg.InputText(key="especialidade")],
             [sg.Text("Nova expediente inicial do médico:"), sg.InputText(key="expediente_inicial")],
             [sg.Text("Nova expediente final do médico:"), sg.InputText(key="expediente_final")],
             [sg.Button("Confirmar"), sg.Button("Cancelar")],
@@ -117,6 +163,10 @@ class TelaMedicos(AbstractTela):
         try:
             return {
                 "nome": values["nome"],
+                "email": values["email"],
+                "contato": values["contato"],
+                "data_nascimento": values["data_nascimento"],
+                "genero": values["genero"],
                 "especialidade": values["especialidade"],
                 "expediente_inicial": values["expediente_inicial"],
                 "expediente_final": values["expediente_final"],
@@ -137,12 +187,12 @@ class TelaMedicos(AbstractTela):
         if button in ("Cancelar", None):
             raise CancelOpException()
 
-        return values["cpf"]
+        return values["crm"] 
 
 
     def exibe_lista_medicos(self, medicos, selecionar=False):
         if not medicos:
-            self.__mostra_mensagem("Erro", "Nenhuma médico cadastrado.")
+            self.__mostra_mensagem("Erro", "Nenhum médico cadastrado.")
             return
 
         layout = [[sg.Text("Médicos cadastrados:")]]
@@ -150,13 +200,20 @@ class TelaMedicos(AbstractTela):
             if selecionar:
                 layout.append([
                     sg.Radio(
-                        f"CRM: {medico['crm']}, Nome: {medico['nome']}, Especialidade: {medico['especialidade']}, Expediente: {medico['expediente_inicial']}-{medico['expediente_final']}, Sala: {medico['sala']}",
-                        "MÉDICOS",
+                        # Exibe nome, email, idade (calculada) e CRM (chave)
+                        f"Nome: {medico['nome']}, Email: {medico['email']}, Idade: {medico['idade']}, "
+                        f"CRM: {medico['crm']}",
+                        "MEDICOS",
                         key=int(medico['crm'])
                     )
                 ])
             else:
-                layout.append([sg.Text(f"CRM: {medico['crm']}, Nome: {medico['nome']}, Especialidade: {medico['especialidade']}, Expediente: {medico['expediente_inicial']}-{medico['expediente_final']}, Sala: {medico['sala']}")])
+                layout.append([sg.Text(
+                    f"Nome: {medico['nome']}, Email: {medico['email']}, Cpf: {medico['cpf']}, Contato: {medico['contato']}, "
+                    f"Idade: {medico['idade']}, Genero: {medico['genero']}, CRM: {medico['crm']}, "
+                    f"Especialidade: {medico['especialidade']}, Expediente: {medico['expediente_inicial']}-{medico['expediente_final']}, "
+                    f"Sala: {medico['sala'].numero}" # Acessa o atributo 'numero' do objeto Sala
+                )])
     
         if selecionar:
             layout.append([sg.Button("Confirmar"), sg.Cancel("Cancelar")])
@@ -174,6 +231,5 @@ class TelaMedicos(AbstractTela):
             if selected:
                 return int(key)
         
-        # Se nenhum médico foi selecionado e o usuário confirmou, levanta exceção
         if selecionar:
             raise CancelOpException()

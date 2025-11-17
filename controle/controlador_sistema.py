@@ -2,6 +2,15 @@ from limite.tela_sistema import TelaSistema
 from controle.controlador_pacientes import ControladorPacientes
 from controle.controlador_consulta import ControladorConsultas
 from controle.controlador_medicos import ControladorMedicos
+from controle.controlador_plano_terapia import ControladorPlanoTerapia
+import hashlib # Importe a biblioteca de hash
+from DAO.usuario_dao import UsuarioDAO
+from limite.tela_login import TelaLogin
+from exceptions.cancel_op_exception import CancelOpException
+
+# Adicione uma constante "secreta" no topo do arquivo.
+# Isso é o nosso "pepper" - um segredo do app.
+APP_SECRET_PEPPER = "meu_projeto_didatico_super_secreto"
 
 class ControladorSistema:
 
@@ -9,7 +18,55 @@ class ControladorSistema:
         self.__controlador_pacientes = ControladorPacientes(self)
         self.__controlador_consulta = ControladorConsultas(self)
         self.__controlador_medicos = ControladorMedicos(self)
+        self.__controlador_plano_terapia = ControladorPlanoTerapia(self)
         self.__tela_sistema = TelaSistema()
+        # --- NOVOS ITENS PARA LOGIN ---
+        self.__usuario_dao = UsuarioDAO()
+        self.__tela_login = TelaLogin() # Você precisará criar esta classe
+        self.__usuario_logado = None # Guarda quem está logado
+        # --- FIM DOS NOVOS ITENS ---
+
+    # --- NOVO MÉTODO DE HASH ---
+    def __hash_senha(self, senha: str) -> str:
+        """Cria um hash SHA256 da senha com um pepper."""
+        # Converte a senha e o pepper para bytes e os concatena
+        senha_com_pepper = senha.encode('utf-8') + APP_SECRET_PEPPER.encode('utf-8')
+        # Cria o hash
+        hash_obj = hashlib.sha256(senha_com_pepper)
+        # Retorna a representação hexadecimal do hash
+        return hash_obj.hexdigest()
+
+    # --- NOVO MÉTODO DE VERIFICAÇÃO ---
+    def verificar_senha(self, senha_digitada: str, hash_armazenado: str) -> bool:
+        """Verifica se a senha digitada corresponde ao hash salvo."""
+        hash_digitado = self.__hash_senha(senha_digitada)
+        return hash_digitado == hash_armazenado
+
+    # --- NOVO MÉTODO DE AUTENTICAÇÃO ---
+    def autenticar(self):
+        """
+        Loop de login. Só sai quando o login for bem-sucedido
+        ou o usuário cancelar.
+        """
+        while True:
+            try:
+                dados = self.__tela_login.pega_dados_login()
+                login = dados["login"]
+                senha_digitada = dados["senha"]
+
+                usuario = self.__usuario_dao.get(login)
+
+                if usuario is None:
+                    self.__tela_login.mostra_mensagem("Erro", "Usuário não encontrado.")
+                elif self.verificar_senha(senha_digitada, usuario.senha_hash):
+                    self.__usuario_logado = usuario # Salva o usuário logado
+                    self.__tela_login.mostra_mensagem("Sucesso", f"Bem-vindo(a), {usuario.login}!")
+                    return True # Sucesso, sai do método
+                else:
+                    self.__tela_login.mostra_mensagem("Erro", "Senha inválida.")
+            
+            except CancelOpException:
+                return False # Usuário cancelou, sinaliza para fechar
 
     @property
     def controlador_pacientes(self):
@@ -23,28 +80,91 @@ class ControladorSistema:
     def controlador_medicos(self):
         return self.__controlador_medicos
 
+    @property
+    def controlador_plano_terapia(self):
+        return self.__controlador_plano_terapia
+
+    @property
+    def usuario_logado(self):
+        """Retorna o objeto do usuário que fez login."""
+        return self.__usuario_logado
+    # --- FIM DA ADIÇÃO ---
+
     def inicializa_sistema(self):
-        self.abre_tela()
+        sucesso_login = self.autenticar()
+        
+        # 2. Se o login for bem-sucedido, abre o menu principal
+        if sucesso_login:
+            self.abre_tela() # Este é o seu 'abre_tela' original
+        else:
+            # Se autenticar retornar False (usuário clicou em Sair), encerra
+            self.encerra_sistema()
 
     def cadastra_paciente(self):
-        self.__controlador_pacientes.abre_tela()
+        # A lógica de permissão vai AQUI
+        if self.__usuario_logado.tipo_usuario == 'secretaria':
+            self.__controlador_pacientes.abre_tela()
+        elif self.__usuario_logado.tipo_usuario == 'paciente':
+            # O paciente só pode editar seus próprios dados
+            # (Você precisará adaptar abre_tela de ControladorPacientes)
+            self.__controlador_pacientes.abre_tela_paciente_logado(self.__usuario_logado.id_entidade)
+        else:
+            self.__tela_sistema.mostra_mensagem("Erro", "Acesso Negado.")
 
     def cadastra_consultas(self):
+        # A lógica de permissão JÁ ESTÁ em ControladorConsultas.abre_tela().
+        # Nós apenas precisamos chamar esse método.
         self.__controlador_consulta.abre_tela()
 
     def cadastra_medicos(self):
-        self.__controlador_medicos.abre_tela()
+        # A lógica de permissão vai AQUI
+        if self.__usuario_logado.tipo_usuario == 'secretaria':
+            self.__controlador_medicos.abre_tela()
+        elif self.__usuario_logado.tipo_usuario == 'medico':
+            self.__controlador_medicos.abre_tela_medico_logado(self.__usuario_logado.id_entidade)
+        else:
+            self.__tela_sistema.mostra_mensagem("Erro", "Acesso Negado.")
+
+    def gerenciar_planos_terapia(self):
+        # A lógica de permissão já está no 'abre_tela' do controlador de planos
+        self.__controlador_plano_terapia.abre_tela()
 
     def encerra_sistema(self):
         exit(0)
 
     def abre_tela(self):
-        lista_opcoes = {1: self.cadastra_paciente,
-                        2: self.cadastra_medicos,
-                        3: self.cadastra_consultas,
-                        0: self.encerra_sistema}
+        # 5. ADICIONAR OPÇÃO 4 no dicionário 'opcoes'
+        
+        opcoes = {}
+        if self.__usuario_logado.tipo_usuario == 'secretaria':
+            opcoes = {1: self.cadastra_paciente,
+                      2: self.cadastra_medicos,
+                      3: self.cadastra_consultas,
+                      # 4: self.gerenciar_planos_terapia, # Secretaria não gerencia planos
+                      0: self.encerra_sistema}
+        
+        elif self.__usuario_logado.tipo_usuario == 'paciente':
+            opcoes = {1: self.cadastra_paciente,
+                      3: self.cadastra_consultas,
+                      4: self.gerenciar_planos_terapia, # Paciente pode ver
+                      0: self.encerra_sistema}
+
+        elif self.__usuario_logado.tipo_usuario == 'medico':
+            opcoes = {2: self.cadastra_medicos,
+                      3: self.cadastra_consultas,
+                      4: self.gerenciar_planos_terapia, # Médico pode criar/ver
+                      0: self.encerra_sistema}
 
         while True:
-            opcao_escolhida = self.__tela_sistema.tela_opcoes()
-            funcao_escolhida = lista_opcoes[opcao_escolhida]
-            funcao_escolhida()
+            # 6. ATUALIZAR a tela_sistema para ela saber quais botões mostrar
+            opcoes_disponiveis = list(opcoes.keys())
+            opcao_escolhida = self.__tela_sistema.tela_opcoes(self.__usuario_logado.tipo_usuario, opcoes_disponiveis)
+            
+            funcao_escolhida = opcoes.get(opcao_escolhida)
+            
+            if funcao_escolhida:
+                if funcao_escolhida == self.encerra_sistema:
+                    break # Sai do loop do menu principal (e volta para o inicializa_sistema)
+                funcao_escolhida()
+            else:
+                self.__tela_sistema.mostra_mensagem("Erro", "Opção inválida.")

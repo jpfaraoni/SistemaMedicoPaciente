@@ -7,20 +7,40 @@ class TelaConsulta(AbstractTela):
     def __init__(self, tela_sistema):
         super().__init__(tela_sistema)
 
-    def tela_opcoes(self):
+    # --- MÉTODO 'tela_opcoes' ATUALIZADO ---
+    def tela_opcoes(self, tipo_usuario: str): # Agora recebe tipo_usuario
         sg.change_look_and_feel('Material1')
 
         layout_esquerda = [
             [sg.Image(filename='limite/imagens/imagem_sistema_pequena..png')]
         ]
 
-        layout_direita = [
-            [sg.Button("Agendar Consulta", key=1, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Atualizar Dados Consulta", key=2, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Cancelar Consulta", key=3, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Listar    Consultas", key=4, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Sair", key=0, size=(11, 1.15), font=("Helvetica", 13))],
-        ]
+        # --- LÓGICA DINÂMICA DO LAYOUT ---
+        layout_direita = []
+        
+        if tipo_usuario == 'secretaria':
+            layout_direita = [
+                [sg.Button("Agendar Consulta", key=1, size=(11, 1.15), font=("Helvetica", 13))],
+                [sg.Button("Atualizar Consulta", key=2, size=(11, 1.15), font=("Helvetica", 13))],
+                [sg.Button("Cancelar Consulta", key=3, size=(11, 1.15), font=("Helvetica", 13))],
+                [sg.Button("Listar Consultas", key=4, size=(11, 1.15), font=("Helvetica", 13))],
+            ]
+        elif tipo_usuario == 'paciente':
+             layout_direita = [
+                [sg.Button("Agendar Consulta", key=1, size=(11, 1.15), font=("Helvetica", 13))],
+                [sg.Button("Reagendar Consulta", key=2, size=(11, 1.15), font=("Helvetica", 13))],
+                [sg.Button("Cancelar Consulta", key=3, size=(11, 1.15), font=("Helvetica", 13))],
+                [sg.Button("Minhas Consultas", key=4, size=(11, 1.15), font=("Helvetica", 13))],
+            ]
+        elif tipo_usuario == 'medico':
+             layout_direita = [
+                [sg.Button("Minha Agenda", key=4, size=(11, 1.15), font=("Helvetica", 13))],
+                # [sg.Button("Sugerir Terapia", key=5, size=(11, 1.15), font=("Helvetica", 13))], # (Para o futuro)
+            ]
+        
+        # Botão Sair é comum a todos
+        layout_direita.append([sg.Button("Sair", key=0, size=(11, 1.15), font=("Helvetica", 13))])
+        # --- FIM DA LÓGICA DINÂMICA ---
 
         layout = [
             [sg.Column(layout_direita),

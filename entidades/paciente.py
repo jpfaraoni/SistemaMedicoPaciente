@@ -1,46 +1,42 @@
-class Paciente:
-    def __init__(self, nome: str, email: str, idade: int, cpf: int):
-        if isinstance(nome, str):
-            self.__nome = nome
-        if isinstance(email, str):
-            self.__email = email
-        if isinstance(idade, int):
-            self.__idade = idade
-        if isinstance(cpf, int):
-            self.__cpf = cpf
+from entidades.pessoa import Pessoa
+
+class Paciente(Pessoa):
+    
+    def __init__(self, nome: str, email: str, cpf: int, contato: str, data_nascimento: str, genero: str, 
+                 convenio: str, deficiente: bool, tipo_sanguineo: str):
+        
+        super().__init__(nome, email, cpf, contato, data_nascimento, genero)
+  
+        if isinstance(convenio, str):
+            self.__convenio = convenio
+        if isinstance(deficiente, bool):
+            self.__deficiente = deficiente
+        if isinstance(tipo_sanguineo, str):
+            self.__tipo_sanguineo = tipo_sanguineo
 
     @property
-    def nome(self):
-        return self.__nome
+    def convenio(self):
+        return self.__convenio
 
-    @nome.setter
-    def nome(self, nome: str):
-        if isinstance(nome, str):
-            self.__nome = nome
-
-    @property
-    def email(self):
-        return self.__email
-
-    @email.setter
-    def email(self, email: str):
-        if isinstance(email, str):
-            self.__email = email
+    @convenio.setter
+    def convenio(self, convenio: str):
+        if isinstance(convenio, str):
+            self.__convenio = convenio
 
     @property
-    def idade(self):
-        return self.__idade
+    def deficiente(self):
+        return self.__deficiente
 
-    @idade.setter
-    def idade(self, idade: int):
-        if isinstance(idade, int):
-            self.__idade = idade
+    @deficiente.setter
+    def deficiente(self, deficiente: bool):
+        if isinstance(deficiente, bool):
+            self.__deficiente = deficiente
 
     @property
-    def cpf(self):
-        return self.__cpf
+    def tipo_sanguineo(self):
+        return self.__tipo_sanguineo
 
-    @cpf.setter
-    def cpf(self, cpf: int):
-        if isinstance(cpf, int):
-            self.__cpf = cpf
+    @tipo_sanguineo.setter
+    def tipo_sanguineo(self, tipo_sanguineo: str):
+        if isinstance(tipo_sanguineo, str):
+            self.__tipo_sanguineo = tipo_sanguineo

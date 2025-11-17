@@ -1,41 +1,61 @@
 #!/usr/bin/env python3
 """
 Script para inicializar o sistema médico.
-Cria salas e médicos iniciais necessários para o funcionamento do sistema.
+Cria salas, pacientes, médicos e usuários iniciais.
 """
 
-from entidades.sala import Sala
-from entidades.medico import Medico
+# Importa as FUNÇÕES de população dos outros scripts
+from popular_salas import popular_salas
+from popular_pacientes import popular_pacientes
+from popular_medicos import popular_medicos
+from popular_usuarios import popular_usuarios
+from popular_planos import popular_planos # <-- 1. IMPORTAR A NOVA FUNÇÃO
 
 def inicializar_sistema():
-    """Inicializa o sistema criando salas e médicos iniciais"""
+    """Inicializa o sistema chamando os populadores em ordem."""
     print("="*60)
     print("INICIALIZAÇÃO DO SISTEMA MÉDICO")
     print("="*60)
     
-    # Primeiro, criar as salas
-    print("\n1. Criando salas...")
+    # 1. Criar as salas (dependência para médicos)
+    print("\n--- 1. Criando Salas ---")
     try:
-        salas_criadas = Sala.popular_salas()
-        if salas_criadas > 0:
-            print(f"✅ {salas_criadas} salas criadas com sucesso!")
-        else:
-            print("ℹ️  Salas já existem no sistema.")
+        popular_salas()
     except Exception as e:
-        print(f"❌ Erro ao criar salas: {e}")
+        print(f"❌ Erro fatal ao criar salas: {e}")
         return False
     
-    # Depois, criar os médicos
-    print("\n2. Criando médicos...")
+    # 2. Criar os pacientes (dependência para usuários)
+    print("\n--- 2. Criando Pacientes ---")
     try:
-        medicos_criados = Medico.popular_medicos()
-        if medicos_criados > 0:
-            print(f"✅ {medicos_criados} médicos criados com sucesso!")
-        else:
-            print("ℹ️  Médicos já existem no sistema.")
+        popular_pacientes()
     except Exception as e:
-        print(f"❌ Erro ao criar médicos: {e}")
+        print(f"❌ Erro fatal ao criar pacientes: {e}")
         return False
+    
+    # 3. Criar os médicos (depende das salas, dependência para usuários)
+    print("\n--- 3. Criando Médicos ---")
+    try:
+        popular_medicos()
+    except Exception as e:
+        print(f"❌ Erro fatal ao criar médicos: {e}")
+        return False
+    
+    # 4. Criar os usuários (depende dos pacientes e médicos existirem)
+    print("\n--- 4. Criando Usuários (Login) ---") # <-- 2. ADICIONAR ESTE PASSO
+    try:
+        popular_usuarios()
+    except Exception as e:
+        print(f"❌ Erro fatal ao criar usuários: {e}")
+        return False
+
+    print("\n--- 4. Criando Planos de Terapia ---") # 2. ADICIONAR ESTE PASSO
+    try:
+        popular_planos()
+    except Exception as e:
+        print(f"❌ Erro fatal ao criar planos: {e}")
+        return False
+    
     
     print("\n" + "="*60)
     print("✅ SISTEMA INICIALIZADO COM SUCESSO!")
