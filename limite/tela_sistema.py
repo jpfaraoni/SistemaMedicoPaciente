@@ -16,10 +16,10 @@ class TelaSistema:
             [sg.Image(filename='limite/imagens/imagem_sistema_pequena..png')]
         ]
         layout_direita = [
-            [sg.Button("Gerenciar Pacientes", key=1, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Gerenciar Médicos", key=2, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Gerenciar Consultas", key=3, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Finalizar  Sistema", key=0, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Gerenciar Pacientes", key=1, size=(11, 2), font=("Helvetica", 13))],
+            [sg.Button("Gerenciar Médicos", key=2, size=(11, 2), font=("Helvetica", 13))],
+            [sg.Button("Gerenciar Consultas", key=3, size=(11, 2), font=("Helvetica", 13))],
+            [sg.Button("Finalizar  Sistema", key=0, size=(11, 2), font=("Helvetica", 13))],
         ]
 
         layout = [

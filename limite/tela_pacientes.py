@@ -15,11 +15,11 @@ class TelaPacientes(AbstractTela):
         ]
 
         layout_direita = [
-            [sg.Button("Adicionar Paciente", key=1, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Atualizar Dados Paciente", key=2, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Remover Paciente", key=3, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Listar    Pacientes", key=4, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Sair", key=0, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Adicionar Paciente", key=1, size=(11, 2), font=("Helvetica", 13))],
+            [sg.Button("Atualizar Dados Paciente", key=2, size=(11, 2), font=("Helvetica", 13))],
+            [sg.Button("Remover Paciente", key=3, size=(11, 2), font=("Helvetica", 13))],
+            [sg.Button("Listar    Pacientes", key=4, size=(11, 2), font=("Helvetica", 13))],
+            [sg.Button("Sair", key=0, size=(11, 2), font=("Helvetica", 13))],
         ]
 
         layout = [

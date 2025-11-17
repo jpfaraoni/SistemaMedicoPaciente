@@ -15,11 +15,11 @@ class TelaConsulta(AbstractTela):
         ]
 
         layout_direita = [
-            [sg.Button("Agendar Consulta", key=1, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Atualizar Dados Consulta", key=2, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Cancelar Consulta", key=3, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Listar    Consultas", key=4, size=(11, 1.15), font=("Helvetica", 13))],
-            [sg.Button("Sair", key=0, size=(11, 1.15), font=("Helvetica", 13))],
+            [sg.Button("Agendar Consulta", key=1, size=(11, 2), font=("Helvetica", 13))],
+            [sg.Button("Atualizar Dados Consulta", key=2, size=(11, 2), font=("Helvetica", 13))],
+            [sg.Button("Cancelar Consulta", key=3, size=(11, 2), font=("Helvetica", 13))],
+            [sg.Button("Listar    Consultas", key=4, size=(11, 2), font=("Helvetica", 13))],
+            [sg.Button("Sair", key=0, size=(11, 2), font=("Helvetica", 13))],
         ]
 
         layout = [

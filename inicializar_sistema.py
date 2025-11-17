@@ -3,12 +3,12 @@
 Script para inicializar o sistema médico.
 Cria salas e médicos iniciais necessários para o funcionamento do sistema.
 """
-
+"""
 from entidades.sala import Sala
 from entidades.medico import Medico
 
 def inicializar_sistema():
-    """Inicializa o sistema criando salas e médicos iniciais"""
+    #Inicializa o sistema criando salas e médicos iniciais
     print("="*60)
     print("INICIALIZAÇÃO DO SISTEMA MÉDICO")
     print("="*60)
@@ -46,3 +46,4 @@ def inicializar_sistema():
 
 if __name__ == "__main__":
     inicializar_sistema()
+"""
