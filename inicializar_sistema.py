@@ -5,11 +5,11 @@ Cria salas, pacientes, médicos e usuários iniciais.
 """
 
 # Importa as FUNÇÕES de população dos outros scripts
-from popular_salas import popular_salas
-from popular_pacientes import popular_pacientes
-from popular_medicos import popular_medicos
-from popular_usuarios import popular_usuarios
-from popular_planos import popular_planos # <-- 1. IMPORTAR A NOVA FUNÇÃO
+from populadores.popular_salas import popular_salas
+from populadores.popular_pacientes import popular_pacientes
+from populadores.popular_medicos import popular_medicos
+from populadores.popular_usuarios import popular_usuarios
+from populadores.popular_planos import popular_planos # <-- 1. IMPORTAR A NOVA FUNÇÃO
 
 def inicializar_sistema():
     """Inicializa o sistema chamando os populadores em ordem."""

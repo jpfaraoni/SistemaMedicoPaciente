@@ -103,6 +103,55 @@ class ControladorConsultas(ControladorEntidadeAbstrata):
         except ValueError:
             return False
 
+    def pode_cancelar_consulta(self, consulta: Consulta) -> bool:
+        """
+        Valida se uma consulta pode ser cancelada respeitando a antecedência mínima de 1 hora.
+        
+        Regra: O paciente não pode cancelar se:
+        - A data da consulta for igual à data atual E
+        - O horário atual + 1 hora for maior ou igual ao horário da consulta
+        
+        Retorna True se pode cancelar, False caso contrário.
+        """
+        # Obtém data e horário atuais de forma simples e clara
+        agora = datetime.now()
+        
+        # Combina data e horário da consulta para criar datetime completo
+        datetime_consulta = datetime.strptime(f"{consulta.data} {consulta.horario}", "%d/%m/%Y %H:%M")
+        
+        # Se a consulta for em data/horário passado, não pode cancelar
+        if datetime_consulta < agora:
+            return False
+        
+        # Se a consulta for em data futura (não é hoje), pode cancelar
+        data_atual_str = agora.strftime("%d/%m/%Y")
+        if consulta.data != data_atual_str:
+            return True
+        
+        # Se for na data atual, verifica a antecedência de 1 hora
+        # Calcula o horário mínimo permitido (agora + 1 hora)
+        horario_minimo_permitido = agora + timedelta(hours=1)
+        
+        # Pode cancelar apenas se o horário da consulta for depois do horário mínimo permitido
+        return datetime_consulta > horario_minimo_permitido
+
+    def validar_triagem(self, paciente: Paciente, medico: Medico) -> bool:
+        """
+        Valida regras de triagem durante o agendamento.
+        
+        Regra RF09: Pacientes com idade menor que 16 anos só podem agendar consultas
+        com médicos que tenham especialidade = "pediatra".
+        
+        Retorna True se a triagem é válida (pode agendar), False caso contrário.
+        """
+        # Verifica se o paciente tem menos de 16 anos
+        if paciente.idade < 16:
+            # Verifica se o médico é ortopedista (comparação case-insensitive)
+            if medico.especialidade.lower() != "pediatria":
+                return False
+        
+        return True
+
     # --- Lógica de Agendamento ---
     
     def agendar_consulta_logica(self, paciente: Paciente, medico: Medico):
@@ -110,29 +159,44 @@ class ControladorConsultas(ControladorEntidadeAbstrata):
         Lógica central de agendamento, reutilizada por Secretaria e Paciente.
         Recebe os objetos Paciente e Medico e cuida do resto.
         """
-        # Obter dados da consulta a partir da visão
-        dados_consulta = self.__telaconsulta.pega_dados_consulta()
-        data = dados_consulta["data"]
-        horario = dados_consulta["horario"]
+        try:
+            # Validar regras de triagem antes de prosseguir
+            if not self.validar_triagem(paciente, medico):
+                self.__telaconsulta.mostra_mensagem(
+                    "Erro de Triagem",
+                    f"Pacientes com idade menor que 16 anos só podem agendar consultas com médicos pediatras.\n"
+                    f"O paciente '{paciente.nome}' tem {paciente.idade} anos e o médico selecionado "
+                    f"'{medico.nome}' é especialista em '{medico.especialidade}'.\n"
+                    f"Por favor, selecione um médico pediatra."
+                )
+                return
+            
+            # Obter dados da consulta a partir da visão
+            dados_consulta = self.__telaconsulta.pega_dados_consulta()
+            data = dados_consulta["data"]
+            horario = dados_consulta["horario"]
 
-        # Validar o horário e data
-        if not self.validar_horario(horario):
-            raise HorarioInvalido(horario)
-        if not self.validar_data(data):
-            raise ValueError("Data inválida. Use o formato DD/MM/AAAA")
+            # Validar o horário e data
+            if not self.validar_horario(horario):
+                raise HorarioInvalido(horario)
+            if not self.validar_data(data):
+                raise ValueError("Data inválida. Use o formato DD/MM/AAAA")
 
-        # Criar uma nova consulta (temporária) para verificar
-        nova_consulta = Consulta(randint(0, 100000), paciente, medico, data, horario, medico.sala)
-        
-        # Verificar conflitos de horário
-        if not self.horario_disponivel(nova_consulta):
-            # A exceção aqui é muito genérica, vamos ser mais específicos
-            raise ValueError(f"Erro: Conflito de horário detectado para {horario} no dia {data}.")
+            # Criar uma nova consulta (temporária) para verificar
+            nova_consulta = Consulta(randint(0, 100000), paciente, medico, data, horario, medico.sala)
+            
+            # Verificar conflitos de horário
+            if not self.horario_disponivel(nova_consulta):
+                # A exceção aqui é muito genérica, vamos ser mais específicos
+                raise ValueError(f"Erro: Conflito de horário detectado para {horario} no dia {data}.")
 
-        # Adicionar a consulta ao banco de dados
-        self.__consulta_DAO.add(nova_consulta)
-        self.__telaconsulta.mostra_mensagem("Confirmação", f"Consulta com o médico '{medico.nome}' adicionada com sucesso!")
-
+            # Adicionar a consulta ao banco de dados
+            self.__consulta_DAO.add(nova_consulta)
+            self.__telaconsulta.mostra_mensagem("Confirmação", f"Consulta com o médico '{medico.nome}' adicionada com sucesso!")
+        except ValueError as ve:
+            self.__telaconsulta.mostra_mensagem("Erro", f"{ve}")
+        except CancelOpException:
+            pass
     # --- Métodos de SECRETÁRIA ---
 
     def adicionar_consultas_secretaria(self):
@@ -243,7 +307,7 @@ class ControladorConsultas(ControladorEntidadeAbstrata):
             # 3. Chama a lógica central de agendamento
             self.agendar_consulta_logica(paciente, medico)
             
-        except (HorarioInvalido, ValueError, MedicoNaoEncontrado, Exception) as e:
+        except (HorarioInvalido, ValueError, MedicoNaoEncontrado) as e:
             self.__telaconsulta.mostra_mensagem("Erro", f"{e}")
         except CancelOpException:
             pass
@@ -300,17 +364,30 @@ class ControladorConsultas(ControladorEntidadeAbstrata):
             pass
 
     def remover_consulta_paciente(self, cpf_logado: int):
-        """ Lógica de remoção restrita para o paciente. """
+        """ Lógica de remoção restrita para o paciente com validação de antecedência mínima. """
         try:
             # 1. Lista APENAS as consultas do paciente logado
             nmr_consulta = self.listar_consultas_paciente(cpf_logado, selecionar=True)
             if nmr_consulta is None:
                 return # Cancelou
 
-            # 2. Remove a consulta selecionada
+            # 2. Busca a consulta para validar a antecedência
+            consulta = self.busca_consulta(nmr_consulta)
+            
+            # 3. Valida se pode cancelar respeitando a antecedência mínima de 1 hora
+            if not self.pode_cancelar_consulta(consulta):
+                self.__telaconsulta.mostra_mensagem(
+                    "Erro", 
+                    "Não é possível cancelar esta consulta. É necessário cancelar com pelo menos 1 hora de antecedência."
+                )
+                return
+
+            # 4. Remove a consulta selecionada
             self.__consulta_DAO.remove(nmr_consulta)
             self.listar_consultas_paciente(cpf_logado, selecionar=False) # Mostra lista atualizada
             self.__telaconsulta.mostra_mensagem("Confirmação", "Consulta removida com sucesso.")
+        except ConsultaNaoEncontrada as e:
+            self.__telaconsulta.mostra_mensagem("Erro", f"{e}")
         except CancelOpException:
             pass
         except ValueError as ve:
@@ -430,15 +507,13 @@ class ControladorConsultas(ControladorEntidadeAbstrata):
             # A tela de consulta agora é dinâmica
             opcao = self.__telaconsulta.tela_opcoes(usuario_logado.tipo_usuario)
             
-            funcao_escolhida = opcoes.get(opcao)
-            
-            if funcao_escolhida:
-                # O 'retornar' é o 0, que é a chave para self.encerra_sistema no ControladorSistema
-                # Aqui, a função 'retornar' (herdada) cuida de voltar ao menu principal
-                if funcao_escolhida == self.retornar:
-                    continua = False
-                else:
-                    funcao_escolhida()
+            if opcao == 0:
+                self.retornar()
+                continua = False
             else:
-                # Se a opção não for 0 e não estiver no dicionário (ex: Paciente clica 2 e não há 2)
-                self.__telaconsulta.mostra_mensagem("Aviso", "Opção não disponível para este tipo de usuário.")
+                funcao_escolhida = opcoes.get(opcao)
+                if funcao_escolhida:
+                    funcao_escolhida()
+                else:
+                    # Se a opção não for 0 e não estiver no dicionário (ex: Paciente clica 2 e não há 2)
+                    self.__telaconsulta.mostra_mensagem("Aviso", "Opção não disponível para este tipo de usuário.")

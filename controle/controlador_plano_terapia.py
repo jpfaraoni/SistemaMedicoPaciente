@@ -115,12 +115,13 @@ class ControladorPlanoTerapia(ControladorEntidadeAbstrata):
         continua = True
         while continua:
             opcao = self.__tela_plano.tela_opcoes(usuario_logado.tipo_usuario)
-            funcao_escolhida = opcoes.get(opcao)
             
-            if funcao_escolhida:
-                if funcao_escolhida == self.retornar:
-                    continua = False
-                else:
-                    funcao_escolhida()
+            if opcao == 0:
+                self.retornar()
+                continua = False
             else:
-                self.__tela_plano.mostra_mensagem("Aviso", "Opção inválida.")
+                funcao_escolhida = opcoes.get(opcao)
+                if funcao_escolhida:
+                    funcao_escolhida()
+                else:
+                    self.__tela_plano.mostra_mensagem("Aviso", "Opção inválida.")

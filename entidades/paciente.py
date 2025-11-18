@@ -6,15 +6,7 @@ class Paciente(Pessoa):
                  convenio: str, deficiente: bool, tipo_sanguineo: str):
         
         super().__init__(nome, email, cpf, contato, data_nascimento, genero)
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-  
-=======
 
->>>>>>> Stashed changes
-=======
-
->>>>>>> Stashed changes
         if isinstance(convenio, str):
             self.__convenio = convenio
         if isinstance(deficiente, bool):
@@ -47,12 +39,4 @@ class Paciente(Pessoa):
     @tipo_sanguineo.setter
     def tipo_sanguineo(self, tipo_sanguineo: str):
         if isinstance(tipo_sanguineo, str):
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
             self.__tipo_sanguineo = tipo_sanguineo
-=======
-            self.__tipo_sanguineo = tipo_sanguineo
->>>>>>> Stashed changes
-=======
-            self.__tipo_sanguineo = tipo_sanguineo
->>>>>>> Stashed changes

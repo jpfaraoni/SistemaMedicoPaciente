@@ -200,9 +200,8 @@ class TelaMedicos(AbstractTela):
             if selecionar:
                 layout.append([
                     sg.Radio(
-                        # Exibe nome, email, idade (calculada) e CRM (chave)
-                        f"Nome: {medico['nome']}, Email: {medico['email']}, Idade: {medico['idade']}, "
-                        f"CRM: {medico['crm']}",
+                        # Exibe nome, email, idade (calculada), CRM (chave) e especialidade.
+                        f"Nome: {medico['nome']}, Email: {medico['email']}, Idade: {medico['idade']}, CRM: {medico['crm']}, Especialidade: {medico['especialidade']}",
                         "MEDICOS",
                         key=int(medico['crm'])
                     )

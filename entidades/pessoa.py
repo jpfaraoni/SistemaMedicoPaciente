@@ -1,11 +1,6 @@
 from abc import ABC, abstractmethod
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 from datetime import datetime
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
 
 class Pessoa(ABC):
     @abstractmethod

@@ -215,11 +215,34 @@ class ControladorPacientes(ControladorEntidadeAbstrata):
 
 
     def abre_tela(self):
+        """
+        Método principal que verifica o tipo de usuário logado e abre a tela apropriada.
+        A lógica de permissão está aqui, delegada do ControladorSistema.
+        """
+        usuario_logado = self._controlador_sistema.usuario_logado
+        
+        if usuario_logado.tipo_usuario == 'secretaria':
+            self.abre_tela_secretaria()
+        elif usuario_logado.tipo_usuario == 'paciente':
+            cpf_logado = usuario_logado.id_entidade
+            self.abre_tela_paciente_logado(cpf_logado)
+        else:
+            self.__telapacientes.mostra_mensagem("Erro", "Acesso Negado.")
+
+    def abre_tela_secretaria(self):
+        """Menu completo para secretaria gerenciar pacientes."""
         lista_opcoes = {1: self.adicionar_paciente, 2: self.atualizar_paciente_secretaria, 3: self.remover_paciente, 4: self.listar_pacientes, 0: self.retornar}
 
         continua = True
         while continua:
-            lista_opcoes[self.__telapacientes.tela_opcoes()]()
+            opcao = self.__telapacientes.tela_opcoes()
+            if opcao == 0:
+                self.retornar()
+                continua = False
+            else:
+                funcao_escolhida = lista_opcoes.get(opcao)
+                if funcao_escolhida:
+                    funcao_escolhida()
 
     def abre_tela_paciente_logado(self, cpf_logado: int):
         # Este é o novo menu restrito para o Paciente
@@ -237,7 +260,7 @@ class ControladorPacientes(ControladorEntidadeAbstrata):
             opcao = self.__telapacientes.tela_opcoes_paciente() 
             
             if opcao == 0:
-                self.retornar
+                continua = False
             else:
                 funcao_escolhida = lista_opcoes.get(opcao)
                 if funcao_escolhida:

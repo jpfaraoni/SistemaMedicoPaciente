@@ -91,39 +91,34 @@ class ControladorSistema:
     # --- FIM DA ADIÇÃO ---
 
     def inicializa_sistema(self):
-        sucesso_login = self.autenticar()
-        
-        # 2. Se o login for bem-sucedido, abre o menu principal
-        if sucesso_login:
-            self.abre_tela() # Este é o seu 'abre_tela' original
-        else:
-            # Se autenticar retornar False (usuário clicou em Sair), encerra
-            self.encerra_sistema()
+        # Loop principal: continua mostrando login até o usuário fechar
+        while True:
+            sucesso_login = self.autenticar()
+            
+            # Se o login for bem-sucedido, abre o menu principal
+            if sucesso_login:
+                self.abre_tela() # Este método agora retorna quando o usuário clica em "Sair"
+                # Quando abre_tela retorna, o usuário já foi limpo pelo fazer_logout()
+                # Volta para o loop e mostra o login novamente
+            else:
+                # Se autenticar retornar False (usuário clicou em Sair no login), encerra
+                self.encerra_sistema()
+                break
 
     def cadastra_paciente(self):
-        # A lógica de permissão vai AQUI
-        if self.__usuario_logado.tipo_usuario == 'secretaria':
-            self.__controlador_pacientes.abre_tela()
-        elif self.__usuario_logado.tipo_usuario == 'paciente':
-            # O paciente só pode editar seus próprios dados
-            # (Você precisará adaptar abre_tela de ControladorPacientes)
-            self.__controlador_pacientes.abre_tela_paciente_logado(self.__usuario_logado.id_entidade)
-        else:
-            self.__tela_sistema.mostra_mensagem("Erro", "Acesso Negado.")
+        # A lógica de permissão está em ControladorPacientes.abre_tela().
+        # Nós apenas precisamos chamar esse método.
+        self.__controlador_pacientes.abre_tela()
 
     def cadastra_consultas(self):
-        # A lógica de permissão JÁ ESTÁ em ControladorConsultas.abre_tela().
+        # A lógica de permissão está em ControladorConsultas.abre_tela().
         # Nós apenas precisamos chamar esse método.
         self.__controlador_consulta.abre_tela()
 
     def cadastra_medicos(self):
-        # A lógica de permissão vai AQUI
-        if self.__usuario_logado.tipo_usuario == 'secretaria':
-            self.__controlador_medicos.abre_tela()
-        elif self.__usuario_logado.tipo_usuario == 'medico':
-            self.__controlador_medicos.abre_tela_medico_logado(self.__usuario_logado.id_entidade)
-        else:
-            self.__tela_sistema.mostra_mensagem("Erro", "Acesso Negado.")
+        # A lógica de permissão está em ControladorMedicos.abre_tela().
+        # Nós apenas precisamos chamar esse método.
+        self.__controlador_medicos.abre_tela()
 
     def gerenciar_planos_terapia(self):
         # A lógica de permissão já está no 'abre_tela' do controlador de planos
@@ -132,39 +127,47 @@ class ControladorSistema:
     def encerra_sistema(self):
         exit(0)
 
+    def fazer_logout(self):
+        """Faz logout e retorna ao login. Chamado quando o usuário clica em 'Sair' no menu principal."""
+        # Apenas marca que deve fazer logout - não limpa ainda para evitar erros
+        return
+
     def abre_tela(self):
         # 5. ADICIONAR OPÇÃO 4 no dicionário 'opcoes'
         
-        opcoes = {}
-        if self.__usuario_logado.tipo_usuario == 'secretaria':
-            opcoes = {1: self.cadastra_paciente,
-                      2: self.cadastra_medicos,
-                      3: self.cadastra_consultas,
-                      # 4: self.gerenciar_planos_terapia, # Secretaria não gerencia planos
-                      0: self.encerra_sistema}
-        
-        elif self.__usuario_logado.tipo_usuario == 'paciente':
-            opcoes = {1: self.cadastra_paciente,
-                      3: self.cadastra_consultas,
-                      4: self.gerenciar_planos_terapia, # Paciente pode ver
-                      0: self.encerra_sistema}
-
-        elif self.__usuario_logado.tipo_usuario == 'medico':
-            opcoes = {2: self.cadastra_medicos,
-                      3: self.cadastra_consultas,
-                      4: self.gerenciar_planos_terapia, # Médico pode criar/ver
-                      0: self.encerra_sistema}
-
         while True:
+            # Recria o dicionário de opções a cada iteração para garantir que está atualizado
+            opcoes = {}
+            if self.__usuario_logado.tipo_usuario == 'secretaria':
+                opcoes = {1: self.cadastra_paciente,
+                          2: self.cadastra_medicos,
+                          3: self.cadastra_consultas,
+                          # 4: self.gerenciar_planos_terapia, # Secretaria não gerencia planos
+                          0: self.fazer_logout}
+            
+            elif self.__usuario_logado.tipo_usuario == 'paciente':
+                opcoes = {1: self.cadastra_paciente,
+                          3: self.cadastra_consultas,
+                          4: self.gerenciar_planos_terapia, # Paciente pode ver
+                          0: self.fazer_logout}
+
+            elif self.__usuario_logado.tipo_usuario == 'medico':
+                opcoes = {2: self.cadastra_medicos,
+                          3: self.cadastra_consultas,
+                          4: self.gerenciar_planos_terapia, # Médico pode criar/ver
+                          0: self.fazer_logout}
+
             # 6. ATUALIZAR a tela_sistema para ela saber quais botões mostrar
-            opcoes_disponiveis = list(opcoes.keys())
+            opcoes_disponiveis = list[int](opcoes.keys())
             opcao_escolhida = self.__tela_sistema.tela_opcoes(self.__usuario_logado.tipo_usuario, opcoes_disponiveis)
             
             funcao_escolhida = opcoes.get(opcao_escolhida)
             
             if funcao_escolhida:
-                if funcao_escolhida == self.encerra_sistema:
-                    break # Sai do loop do menu principal (e volta para o inicializa_sistema)
+                if funcao_escolhida == self.fazer_logout:
+                    # Limpa o usuário logado e sai do loop
+                    self.__usuario_logado = None
+                    break # Sai do loop do menu principal (e volta para o loop de login em inicializa_sistema)
                 funcao_escolhida()
             else:
                 self.__tela_sistema.mostra_mensagem("Erro", "Opção inválida.")

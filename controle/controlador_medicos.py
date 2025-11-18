@@ -260,11 +260,34 @@ class ControladorMedicos(ControladorEntidadeAbstrata):
             self.__telamedico.mostra_mensagem(f"Sala {sala.numero} - Andar {sala.andar} (Capacidade: {sala.capacidade})")
 
     def abre_tela(self):
+        """
+        Método principal que verifica o tipo de usuário logado e abre a tela apropriada.
+        A lógica de permissão está aqui, delegada do ControladorSistema.
+        """
+        usuario_logado = self._controlador_sistema.usuario_logado
+        
+        if usuario_logado.tipo_usuario == 'secretaria':
+            self.abre_tela_secretaria()
+        elif usuario_logado.tipo_usuario == 'medico':
+            crm_logado = usuario_logado.id_entidade
+            self.abre_tela_medico_logado(crm_logado)
+        else:
+            self.__telamedico.mostra_mensagem("Erro", "Acesso Negado.")
+
+    def abre_tela_secretaria(self):
+        """Menu completo para secretaria gerenciar médicos."""
         lista_opcoes = {1: self.adicionar_medico, 2: self.atualizar_medico_secretaria, 3: self.remover_medico, 4: self.listar_medicos, 0: self.retornar}
 
         continua = True
         while continua:
-            lista_opcoes[self.__telamedico.tela_opcoes()]()
+            opcao = self.__telamedico.tela_opcoes()
+            if opcao == 0:
+                self.retornar()
+                continua = False
+            else:
+                funcao_escolhida = lista_opcoes.get(opcao)
+                if funcao_escolhida:
+                    funcao_escolhida()
 
     # --- NOVO MÉTODO (PARA MÉDICO LOGADO) ---
     def abre_tela_medico_logado(self, crm_logado: int):
