@@ -2,6 +2,7 @@ from abstrato.dao import DAO
 from entidades.medico import Medico
 
 class MedicoDAO(DAO):
+    """Especialização do template DAO para persistir médicos."""
     def __init__(self):
         super().__init__('medicos.pkl')
 

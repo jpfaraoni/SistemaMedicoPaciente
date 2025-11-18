@@ -5,9 +5,10 @@ from DAO.sala_dao import SalaDAO
 from exceptions.medico_nao_encontrado_exception import MedicoNaoEncontrado
 from exceptions.cancel_op_exception import CancelOpException
 from limite.tela_medicos import TelaMedicos
-import PySimpleGUI as sg
 
 class ControladorMedicos(ControladorEntidadeAbstrata):
+    """Participa da fachada expondo operações de médicos via telas e DAOs."""
+
     def __init__(self, controlador_sistema):
         super().__init__(controlador_sistema)
         self.__telamedico = TelaMedicos(controlador_sistema)
@@ -18,21 +19,18 @@ class ControladorMedicos(ControladorEntidadeAbstrata):
         try:
             dados_medico = self.__telamedico.pega_dados_medicos()
 
-            # Dados de Pessoa
             nome = dados_medico["nome"]
             email = dados_medico["email"]
-            cpf = dados_medico["cpf"] # Já vem como int
+            cpf = dados_medico["cpf"]
             contato = dados_medico["contato"]
             data_nascimento = dados_medico["data_nascimento"]
             genero = dados_medico["genero"]
-            
-            # Dados de Medico
-            crm = dados_medico["crm"] # Já vem como int
+
+            crm = dados_medico["crm"]
             especialidade = dados_medico["especialidade"]
             expediente_inicial = dados_medico["expediente_inicial"]
             expediente_final = dados_medico["expediente_final"]
 
-            # Validações básicas
             if not all([nome, email, cpf, contato, data_nascimento, genero, crm, especialidade, expediente_inicial, expediente_final]):
                 raise ValueError("Erro", "Todos os campos são obrigatórios.")
 
@@ -50,7 +48,6 @@ class ControladorMedicos(ControladorEntidadeAbstrata):
                 self.__telamedico.mostra_mensagem("Erro", f"Médico com CRM {crm} já está cadastrado.")
                 return
             except MedicoNaoEncontrado:
-
                 salas = self.__sala_DAO.get_all()
                 if not salas:
                     self.__telamedico.mostra_mensagem("Erro", "Nenhuma sala cadastrada. Crie salas primeiro.")
@@ -74,34 +71,25 @@ class ControladorMedicos(ControladorEntidadeAbstrata):
         except ValueError as ve:
             self.__telamedico.mostra_mensagem("Erro", f"{ve}")
         except CancelOpException:
-            pass  # Usuário cancelou - não faz nada
+            pass
         except Exception as e:
             self.__telamedico.mostra_mensagem("Erro", f"Erro inesperado: {e}")
         
-    # --- MÉTODO ATUALIZADO (PARA SECRETÁRIA) ---
     def atualizar_medico_secretaria(self):
-        # Este é o seu 'atualizar_paciente' original
-        # A secretária precisa selecionar o paciente primeiro
         try:
             crm = self.listar_medicos(selecionar=True)
             if crm is None:
-                return  # Secretária cancelou
-            
-            # Chama o método de lógica de atualização
-            self.atualizar_medico_com_crm(crm) 
+                return
+            self.atualizar_medico_com_crm(crm)
 
         except (MedicoNaoEncontrado, ValueError) as e:
             self.__telamedico.mostra_mensagem("Erro:", f"{e}")
         except CancelOpException:
             pass
 
-     # --- NOVO MÉTODO (PARA PACIENTE LOGADO) ---
     def atualizar_meus_dados(self, crm_logado: int):
-        # Este método não lista pacientes. Ele já sabe qual paciente editar.
         try:
-            # Chama o método de lógica de atualização diretamente
             self.atualizar_medico_com_crm(crm_logado)
-            
         except (MedicoNaoEncontrado, ValueError) as e:
             self.__telamedico.mostra_mensagem("Erro:", f"{e}")
         except CancelOpException:
@@ -112,9 +100,7 @@ class ControladorMedicos(ControladorEntidadeAbstrata):
 
             if crm is None:
                 return
-            
             medico = self.busca_medico(crm)
-            
             novos_dados = self.__telamedico.pega_novos_dados_medicos()
 
             nome = novos_dados["nome"]
@@ -161,34 +147,23 @@ class ControladorMedicos(ControladorEntidadeAbstrata):
             pass
 
     def ver_meus_dados(self, crm_logado: int):
-        """
-        Mostra os dados apenas do médico logado.
-        """
         try:
             medico = self.busca_medico(crm_logado)
-            
-            # Formata os dados para a tela de listagem (mas com apenas 1 paciente)
             medicos_info = [{
-                 # Atributos de Pessoa
                 "nome": medico.nome,
                 "email": medico.email,
                 "cpf": medico.cpf,
                 "contato": medico.contato,
                 "data_nascimento": medico.data_nascimento,
                 "genero": medico.genero,
-                "idade": medico.idade, # A IDADE CALCULADA!
-                
-                # Atributos específicos de Medico
+                "idade": medico.idade,
                 "crm": medico.crm,
                 "especialidade": medico.especialidade,
                 "expediente_inicial": medico.expediente_inicial,
                 "expediente_final": medico.expediente_final,
-                "sala": medico.sala # Passa o objeto Sala inteiro
+                "sala": medico.sala
             }]
-            
-            # Reutiliza a 'exibe_lista_pacientes' sem seleção
             self.__telamedico.exibe_lista_medicos(medicos_info, selecionar=False)
-            
         except MedicoNaoEncontrado as e:
             self.__telamedico.mostra_mensagem("Erro:", f"{e}")
         except CancelOpException:
@@ -196,12 +171,9 @@ class ControladorMedicos(ControladorEntidadeAbstrata):
 
     def remover_medico(self):
         try:
-            # Listar médicos para seleção
             crm = self.listar_medicos(selecionar=True)
-            
             if crm is None:
                 return
-    
             medico = self.busca_medico(crm)
             self.__medico_DAO.remove(crm)
             self.listar_medicos()
@@ -227,21 +199,19 @@ class ControladorMedicos(ControladorEntidadeAbstrata):
             return None
 
         medicos_info = [{
-                    # Atributos de Pessoa
                     "nome": medico.nome,
                     "email": medico.email,
                     "cpf": medico.cpf,
                     "contato": medico.contato,
                     "data_nascimento": medico.data_nascimento,
                     "genero": medico.genero,
-                    "idade": medico.idade, # A IDADE CALCULADA!
+                    "idade": medico.idade, 
                     
-                    # Atributos específicos de Medico
                     "crm": medico.crm,
                     "especialidade": medico.especialidade,
                     "expediente_inicial": medico.expediente_inicial,
                     "expediente_final": medico.expediente_final,
-                    "sala": medico.sala # Passa o objeto Sala inteiro
+                    "sala": medico.sala 
                 }
                           for medico in medicos]
         try:
@@ -250,7 +220,6 @@ class ControladorMedicos(ControladorEntidadeAbstrata):
             return None
 
     def listar_salas(self):
-        """Lista todas as salas disponíveis"""
         salas = self.__sala_DAO.get_all()
         if not salas:
             self.__telamedico.mostra_mensagem("Erro", "Nenhuma sala cadastrada.")
@@ -275,7 +244,7 @@ class ControladorMedicos(ControladorEntidadeAbstrata):
             self.__telamedico.mostra_mensagem("Erro", "Acesso Negado.")
 
     def abre_tela_secretaria(self):
-        """Menu completo para secretaria gerenciar médicos."""
+
         lista_opcoes = {1: self.adicionar_medico, 2: self.atualizar_medico_secretaria, 3: self.remover_medico, 4: self.listar_medicos, 0: self.retornar}
 
         continua = True
@@ -289,10 +258,8 @@ class ControladorMedicos(ControladorEntidadeAbstrata):
                 if funcao_escolhida:
                     funcao_escolhida()
 
-    # --- NOVO MÉTODO (PARA MÉDICO LOGADO) ---
+
     def abre_tela_medico_logado(self, crm_logado: int):
-        # Este é o novo menu restrito para o Medico
-        # Note que passamos o 'crm_logado' para os métodos
         lista_opcoes = {
             1: lambda: self.ver_meus_dados(crm_logado),
             2: lambda: self.atualizar_meus_dados(crm_logado),
@@ -301,8 +268,7 @@ class ControladorMedicos(ControladorEntidadeAbstrata):
         
         continua = True
         while continua:
-            # Você precisa criar este novo método de tela em TelaPacientes
-            # que mostra apenas os botões "Ver Meus Dados", "Atualizar Meus Dados" e "Sair"
+
             opcao = self.__telamedico.tela_opcoes_medico() 
             
             if opcao == 0:

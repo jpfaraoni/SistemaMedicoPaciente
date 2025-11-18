@@ -1,8 +1,10 @@
 import pickle
 from abc import ABC, abstractmethod
 
-# Classe DAO abstrata
+
 class DAO(ABC):
+    """Implementa o método-modelo de serialização: subclasses definem apenas o tipo salvo."""
+
     def __init__(self, datasource= ''):
         self.__datasource = datasource
         self.__cache = {}
@@ -23,9 +25,9 @@ class DAO(ABC):
 
     def update(self, key, obj):
         try:
-            if(self.__cache[key] != None):
-                self.__cache[key] = obj #atualiza a entrada
-                self.__dump()  #atualiza o arquivo
+            if self.__cache[key] is not None:
+                self.__cache[key] = obj
+                self.__dump()
         except KeyError:
             pass
 

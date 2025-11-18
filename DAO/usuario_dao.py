@@ -3,7 +3,6 @@ from entidades.usuario import Usuario
 
 class UsuarioDAO(DAO):
     def __init__(self):
-        # Usa o pickle, como solicitado
         super().__init__('usuarios.pkl')
 
     def add(self, usuario: Usuario):
@@ -14,5 +13,3 @@ class UsuarioDAO(DAO):
     def get(self, key_login: str):
         if isinstance(key_login, str):
             return super().get(key_login)
-
-    # update e remove se necessário...

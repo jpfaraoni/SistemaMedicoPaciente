@@ -4,6 +4,7 @@ from limite.tela_pacientes import TelaPacientes
 from limite.tela_sistema import TelaSistema
 
 class PacienteDAO(DAO):
+    """Especialização do template DAO para persistir pacientes."""
     def __init__(self):
         super().__init__('pacientes.pkl')
         self.__telapacientes = TelaPacientes(TelaSistema)

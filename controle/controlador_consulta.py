@@ -1,5 +1,3 @@
-# Arquivo: controle/controlador_consulta.py
-
 from exceptions.cancel_op_exception import CancelOpException
 from exceptions.sala_nao_encontrada_exception import SalaNaoEncontrada
 from datetime import datetime, timedelta
@@ -14,70 +12,44 @@ from exceptions.consulta_nao_encontrada_exception import ConsultaNaoEncontrada
 from entidades.consulta import Consulta
 from exceptions.medico_nao_encontrado_exception import MedicoNaoEncontrado
 from exceptions.paciente_nao_encontrado_exception import PacienteNaoEncontrado
-# from controle.controlador_medicos import ControladorMedicos
 
 
 class ControladorConsultas(ControladorEntidadeAbstrata):
+    """Participa da fachada controlando fluxos de consulta conforme o usuário logado."""
 
     def __init__(self, controlador_sistema):
         super().__init__(controlador_sistema)
         self.__telaconsulta = TelaConsulta(controlador_sistema)
         self.__consulta_DAO = ConsultaDAO()
-        #TODO instanciar os dao's de medicos e pacientes para a consulta de banco de dados 
-       
-        """
-        Controlador responsável por gerenciar as Consultas.
-        """
 
     def horario_disponivel(self, nova_consulta:Consulta):
-        """
-        Verifica se há conflito entre a data/horário da nova consulta e as consultas já cadastradas.
-        Considera que cada consulta dura sempre 1 hora.
-        Verifica conflitos na mesma data e horário para sala, médico e paciente.
-        """
-        # Valida o horário da nova consulta
         if not self.validar_horario(nova_consulta.horario):
             raise HorarioInvalido(nova_consulta.horario)
-
-        # Valida a data da nova consulta
         if not self.validar_data(nova_consulta.data):
             raise ValueError("Data inválida. Use o formato DD/MM/AAAA")
-
-        # Combina data e horário para criar datetime completo
         novo_datetime_inicio = datetime.strptime(f"{nova_consulta.data} {nova_consulta.horario}", "%d/%m/%Y %H:%M")
-        # Consulta sempre dura 1 hora
         novo_datetime_termino = novo_datetime_inicio + timedelta(hours=1)
 
         consultas = self.__consulta_DAO.get_all()
         for consulta in consultas:
-            # Ignora a própria consulta se estivermos atualizando
             if consulta.numero == nova_consulta.numero:
                 continue
-                
-            # Só verifica conflitos se for na mesma data
             if consulta.data == nova_consulta.data:
-                # Combina data e horário da consulta existente
                 datetime_inicio_existente = datetime.strptime(f"{consulta.data} {consulta.horario}", "%d/%m/%Y %H:%M")
-                # Consulta existente também dura 1 hora
                 datetime_termino_existente = datetime_inicio_existente + timedelta(hours=1)
 
-                # Verifica conflito na mesma sala
                 if consulta.sala.numero == nova_consulta.sala.numero:
                     if (novo_datetime_inicio < datetime_termino_existente and
                             novo_datetime_termino > datetime_inicio_existente):
-                        return False  # Conflito de horário na sala
-                
-                # Verifica conflito com o mesmo médico
+                        return False
                 if consulta.medico.crm == nova_consulta.medico.crm:
                     if (novo_datetime_inicio < datetime_termino_existente and
                             novo_datetime_termino > datetime_inicio_existente):
-                        return False  # Conflito de horário para o médico
-                
-                # Verifica conflito com o mesmo paciente
+                        return False
                 if consulta.paciente.cpf == nova_consulta.paciente.cpf:
                     if (novo_datetime_inicio < datetime_termino_existente and
                             novo_datetime_termino > datetime_inicio_existente):
-                        return False  # Conflito de horário para o paciente
+                        return False
                     
         return True  # Horário disponível
 

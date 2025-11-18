@@ -6,6 +6,8 @@ from exceptions.cancel_op_exception import CancelOpException
 from DAO.paciente_dao import PacienteDAO
 
 class ControladorPacientes(ControladorEntidadeAbstrata):
+    """Participa da fachada delegando regras de paciente às telas e DAOs."""
+
     def __init__(self, controlador_sistema):
         super().__init__(controlador_sistema)
         self.__telapacientes = TelaPacientes(controlador_sistema)
@@ -16,14 +18,14 @@ class ControladorPacientes(ControladorEntidadeAbstrata):
             dados_paciente = self.__telapacientes.pega_dados_paciente()
             nome = dados_paciente["nome"]
             email = dados_paciente["email"]
-            cpf = dados_paciente["cpf"] # Já deve vir como int da tela (após correção)
+            cpf = dados_paciente["cpf"]
 
             contato = dados_paciente["contato"]
             data_nascimento = dados_paciente["data_nascimento"]
             genero = dados_paciente["genero"]
 
             convenio = dados_paciente["convenio"]
-            deficiente = dados_paciente["deficiente"] # Já deve vir como bool da tela (após correção)
+            deficiente = dados_paciente["deficiente"]
             tipo_sanguineo = dados_paciente["tipo_sanguineo"]
 
             if not all([nome, email, cpf, contato, data_nascimento, genero, convenio, deficiente, tipo_sanguineo]):
@@ -52,49 +54,32 @@ class ControladorPacientes(ControladorEntidadeAbstrata):
         except ValueError as ve:
             self.__telapacientes.mostra_mensagem("Erro:", f"{ve}")
         except CancelOpException:
-                pass
-        # except Exception as e:
-        #     self.__telapacientes.mostra_mensagem(f"Erro: {e}", f"{e}")
+            pass
 
-    # --- MÉTODO ATUALIZADO (PARA SECRETÁRIA) ---
     def atualizar_paciente_secretaria(self):
-        # Este é o seu 'atualizar_paciente' original
-        # A secretária precisa selecionar o paciente primeiro
         try:
             cpf = self.listar_pacientes(selecionar=True)
             if cpf is None:
-                return  # Secretária cancelou
-            
-            # Chama o método de lógica de atualização
-            self.atualizar_paciente_com_cpf(cpf) 
-
+                return
+            self.atualizar_paciente_com_cpf(cpf)
         except (PacienteNaoEncontrado, ValueError) as e:
             self.__telapacientes.mostra_mensagem("Erro:", f"{e}")
         except CancelOpException:
             pass
 
-     # --- NOVO MÉTODO (PARA PACIENTE LOGADO) ---
     def atualizar_meus_dados(self, cpf_logado: int):
-        # Este método não lista pacientes. Ele já sabe qual paciente editar.
         try:
-            # Chama o método de lógica de atualização diretamente
             self.atualizar_paciente_com_cpf(cpf_logado)
-            
         except (PacienteNaoEncontrado, ValueError) as e:
             self.__telapacientes.mostra_mensagem("Erro:", f"{e}")
         except CancelOpException:
             pass
 
     def atualizar_paciente_com_cpf(self, cpf: int):
-        #TODO implementar um metodo update na classe DAO abstrata e realizar o update apos atualizar o objeto para o db refletir a nova instancia.
         try:
-            # Verifica se o usuário cancelou a seleção do paciente
             if cpf is None:
-                return  # Retorna silenciosamente se o usuário cancelou
-
+                return
             paciente = self.busca_paciente(cpf)
-            
-            # Agora tenta pegar os novos dados - se cancelar aqui, a exceção será capturada
             novos_dados = self.__telapacientes.pega_novos_dados_paciente()
 
             nome = novos_dados["nome"]
@@ -133,17 +118,11 @@ class ControladorPacientes(ControladorEntidadeAbstrata):
         except ValueError as ve:
             self.__telapacientes.mostra_mensagem("Erro:", f"{ve}")
         except CancelOpException:
-            pass  # Usuário cancelou - não faz nada
+            pass
 
-    # --- NOVO MÉTODO (PARA PACIENTE LOGADO) ---
     def ver_meus_dados(self, cpf_logado: int):
-        """
-        Mostra os dados apenas do paciente logado.
-        """
         try:
             paciente = self.busca_paciente(cpf_logado)
-            
-            # Formata os dados para a tela de listagem (mas com apenas 1 paciente)
             paciente_info = [{
                 "nome": paciente.nome,
                 "email": paciente.email,
@@ -157,9 +136,7 @@ class ControladorPacientes(ControladorEntidadeAbstrata):
                 "idade": paciente.idade
             }]
             
-            # Reutiliza a 'exibe_lista_pacientes' sem seleção
             self.__telapacientes.exibe_lista_pacientes(paciente_info, selecionar=False)
-            
         except PacienteNaoEncontrado as e:
             self.__telapacientes.mostra_mensagem("Erro:", f"{e}")
         except CancelOpException:
@@ -176,9 +153,8 @@ class ControladorPacientes(ControladorEntidadeAbstrata):
         try:
             cpf = self.listar_pacientes(selecionar=True)
 
-            # Verifica se o usuário cancelou a seleção do paciente
             if cpf is None:
-                return  # Retorna silenciosamente se o usuário cancelou
+                return
 
             self.__paciente_DAO.remove(cpf)
             self.__telapacientes.mostra_mensagem("Confirmação", f"Paciente com cpf '{cpf}' foi removido com sucesso.")
@@ -186,10 +162,9 @@ class ControladorPacientes(ControladorEntidadeAbstrata):
         except PacienteNaoEncontrado as e:
             self.__telapacientes.mostra_mensagem(f"Erro:", f"{e}")
         except CancelOpException:
-            pass  # Usuário cancelou - não faz nada
+            pass
 
     def listar_pacientes(self, selecionar=False):
-
         pacientes = self.__paciente_DAO.get_all()
         if not pacientes:
             self.__telapacientes.mostra_mensagem("Erro", "Nenhum paciente cadastrado.")
@@ -205,15 +180,13 @@ class ControladorPacientes(ControladorEntidadeAbstrata):
                 "convenio": paciente.convenio,
                 "deficiente": paciente.deficiente,
                 "tipo_sanguineo": paciente.tipo_sanguineo,
-                "idade": paciente.idade # A IDADE CALCULADA!
+                "idade": paciente.idade 
             }
                           for paciente in pacientes]
         try:
             return self.__telapacientes.exibe_lista_pacientes(pacientes_info, selecionar)
         except CancelOpException:
-            return None  # Retorna None explicitamente quando o usuário cancela
-
-
+            return None
     def abre_tela(self):
         """
         Método principal que verifica o tipo de usuário logado e abre a tela apropriada.
@@ -245,8 +218,7 @@ class ControladorPacientes(ControladorEntidadeAbstrata):
                     funcao_escolhida()
 
     def abre_tela_paciente_logado(self, cpf_logado: int):
-        # Este é o novo menu restrito para o Paciente
-        # Note que passamos o 'cpf_logado' para os métodos
+  
         lista_opcoes = {
             1: lambda: self.ver_meus_dados(cpf_logado),
             2: lambda: self.atualizar_meus_dados(cpf_logado),
@@ -255,8 +227,7 @@ class ControladorPacientes(ControladorEntidadeAbstrata):
         
         continua = True
         while continua:
-            # Você precisa criar este novo método de tela em TelaPacientes
-            # que mostra apenas os botões "Ver Meus Dados", "Atualizar Meus Dados" e "Sair"
+
             opcao = self.__telapacientes.tela_opcoes_paciente() 
             
             if opcao == 0:
